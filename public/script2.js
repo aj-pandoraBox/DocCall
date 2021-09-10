@@ -1,6 +1,8 @@
 let url_string = window.location.href;
 var url = new URL(url_string);
 let meeting_id = url.searchParams.get("meeting_id");
+let person_name = url.searchParams.get("username");
+
 let video_info = document.getElementById("video-info-tag")
 let my_video = document.getElementById("my-video")
 let peer_video = document.getElementById("peer-video")
@@ -37,7 +39,10 @@ if (meeting_id) {
 
     // making a join event to the server
 
-    socket.emit("join", meeting_id);
+    if (!person_name) {
+        person_name = "";
+    }
+    socket.emit("join", meeting_id, person_name);
 
 
 } else {
@@ -68,7 +73,7 @@ socket.on("created", () => {
 
 
 
-socket.on("joined", () => {
+socket.on("joined", (person_name) => {
 
 
     // setting video into our broswer
@@ -80,7 +85,7 @@ socket.on("joined", () => {
             my_video.play();
         }
         video_float_info[0].style.display = "none";
-        socket.emit("ready", meeting_id);
+        socket.emit("ready", meeting_id, person_name);
 
 
     }).catch((error) => {
@@ -92,15 +97,26 @@ socket.on("joined", () => {
 })
 
 
+socket.on("noSuchRoom", () => {
+    alert("Please Check Your Meeting No or Contact your Doctor");
+    window.location.replace(`/`);
+
+})
+
+
+
 socket.on("full", () => {
     alert("Sorry Doctor is in session, please try again later");
     window.location.replace(`/`);
 
 })
 
-socket.on("ready", () => {
+
+
+
+socket.on("ready", (person_name) => {
     patientEntered = true;
-    video_info.innerText += `\nPatient has entered`;
+    video_info.innerText += `\nPatient ${person_name} has entered`;
     video_float_info[0].style.display = "flex";
 
     if (creator) {
@@ -172,6 +188,10 @@ let geetingMediaStream = (event) => {
 
 video_call_end.addEventListener("click", () => {
 
+
+    if (creator) {
+        downloadFile(meeting_id, video_info.innerText);
+    }
     socket.emit("leave", meeting_id);
 
     if (my_video.srcObject) {
@@ -204,6 +224,7 @@ video_hide.addEventListener("click", () => {
 
     if (video_hide.innerText == "videocam") {
         video_hide.innerText = "videocam_off";
+
         User_streams.getTracks()[1].enabled = false;
     } else {
         User_streams.getTracks()[1].enabled = true;
@@ -255,3 +276,18 @@ socket.on("leave", () => {
 
 
 })
+
+
+let downloadFile = (filename, data) => {
+
+    // creating an <a> tag;
+    let element = document.createElement('a');
+    element.style.display = "none";
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
+    element.setAttribute('download', filename);
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+
+
+}

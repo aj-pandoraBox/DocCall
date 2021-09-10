@@ -14,20 +14,26 @@ let io = socket(server);
 
 io.on("connection", (socket) => {
 
-    socket.on("join", (meeting_id) => {
+    socket.on("join", (meeting_id, person_name) => {
 
         // finding no of rooms in the server
 
         let rooms = io.sockets.adapter.rooms;
         let room = rooms.get(meeting_id);
 
-        if (room == undefined) {
+
+
+        if (person_name == "" && room == undefined) {
             socket.join(meeting_id);
             socket.emit("created");
 
-        } else if (room.size == 1) {
+        }
+        else if (person_name != "" && room == undefined) {
+            socket.emit("noSuchRoom");
+        }
+        else if (room.size == 1) {
             socket.join(meeting_id);
-            socket.emit("joined");
+            socket.emit("joined", person_name);
         } else {
             socket.emit("full");
         }
@@ -38,9 +44,9 @@ io.on("connection", (socket) => {
     // let doctor know patient joined the room with the help of ready event
 
 
-    socket.on("ready", (meeting_id) => {
+    socket.on("ready", (meeting_id, person_name) => {
 
-        socket.broadcast.to(meeting_id).emit("ready");
+        socket.broadcast.to(meeting_id).emit("ready", person_name);
     })
 
 
@@ -69,6 +75,10 @@ io.on("connection", (socket) => {
 
 
     socket.on("leave", (meeting_id) => {
+
+
+
+
         socket.leave(meeting_id);
         socket.broadcast.to(meeting_id).emit("leave");
     })

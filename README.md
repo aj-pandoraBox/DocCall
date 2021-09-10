@@ -7,6 +7,9 @@ The app allows Patient to connect with their virtual Doctor with the help of the
 
 
 Doctors also get a text file downloaded when they end the meeting, the text file contains all the names of the Patient that have called the Doctor.
+
+![](public/images/image-1.png)
+
 ## Tech Stack
 
 **Client:** HTML, CSS, JAVASCRIPT

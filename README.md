@@ -19,6 +19,6 @@ Doctors also get a text file downloaded when they end the meeting, the text file
 
 **Client:** HTML, CSS, JAVASCRIPT
 
-**Server:** Node, Express, Socket.io
+**Server:** Express, Socket.io
 
   
